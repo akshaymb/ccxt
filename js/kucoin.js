@@ -82,11 +82,8 @@ module.exports = class kucoin extends Exchange {
                         'markets',
                         'market/allTickers',
                         'market/orderbook/level{level}_{limit}',
-                        'market/orderbook/level{level}',
-                        'market/orderbook/level2',
                         'market/orderbook/level2_20',
                         'market/orderbook/level2_100',
-                        'market/orderbook/level3',
                         'market/histories',
                         'market/candles',
                         'market/stats',
@@ -102,6 +99,9 @@ module.exports = class kucoin extends Exchange {
                 },
                 'private': {
                     'get': [
+                        'market/orderbook/level{level}',
+                        'market/orderbook/level2',
+                        'market/orderbook/level3',
                         'accounts',
                         'accounts/{accountId}',
                         'accounts/{accountId}/ledgers',
@@ -316,15 +316,17 @@ module.exports = class kucoin extends Exchange {
                     'public': {
                         'GET': {
                             'status': 'v1',
-                            'market/orderbook/level2': 'v2',
-                            'market/orderbook/level3': 'v2',
                             'market/orderbook/level2_20': 'v1',
                             'market/orderbook/level2_100': 'v1',
-                            'market/orderbook/level{level}': 'v2',
                             'market/orderbook/level{level}_{limit}': 'v1',
                         },
                     },
                     'private': {
+                        'GET': {
+                            'market/orderbook/level2': 'v3',
+                            'market/orderbook/level3': 'v3',
+                            'market/orderbook/level{level}': 'v3',
+                        },
                         'POST': {
                             'accounts/inner-transfer': 'v2',
                             'accounts/sub-transfer': 'v2',
@@ -348,8 +350,10 @@ module.exports = class kucoin extends Exchange {
                 'accountsByType': {
                     'trade': 'trade',
                     'trading': 'trade',
+                    'spot': 'trade',
                     'margin': 'margin',
                     'main': 'main',
+                    'funding': 'main',
                     'futures': 'contract',
                     'contract': 'contract',
                     'pool': 'pool',
@@ -562,9 +566,10 @@ module.exports = class kucoin extends Exchange {
     }
 
     async fetchFundingFee (code, params = {}) {
-        const currencyId = this.currencyId (code);
+        await this.loadMarkets ();
+        const currency = this.currency (code);
         const request = {
-            'currency': currencyId,
+            'currency': currency['id'],
         };
         const response = await this.privateGetWithdrawalsQuotas (this.extend (request, params));
         const data = response['data'];
@@ -778,8 +783,8 @@ module.exports = class kucoin extends Exchange {
 
     async createDepositAddress (code, params = {}) {
         await this.loadMarkets ();
-        const currencyId = this.currencyId (code);
-        const request = { 'currency': currencyId };
+        const currency = this.currency (code);
+        const request = { 'currency': currency['id'] };
         const response = await this.privatePostDepositAddresses (this.extend (request, params));
         // BCH {"code":"200000","data":{"address":"bitcoincash:qza3m4nj9rx7l9r0cdadfqxts6f92shvhvr5ls4q7z","memo":""}}
         // BTC {"code":"200000","data":{"address":"36SjucKqQpQSvsak9A7h6qzFjrVXpRNZhE","memo":""}}
@@ -804,8 +809,8 @@ module.exports = class kucoin extends Exchange {
 
     async fetchDepositAddress (code, params = {}) {
         await this.loadMarkets ();
-        const currencyId = this.currencyId (code);
-        const request = { 'currency': currencyId };
+        const currency = this.currency (code);
+        const request = { 'currency': currency['id'] };
         const response = await this.privateGetDepositAddresses (this.extend (request, params));
         // BCH {"code":"200000","data":{"address":"bitcoincash:qza3m4nj9rx7l9r0cdadfqxts6f92shvhvr5ls4q7z","memo":""}}
         // BTC {"code":"200000","data":{"address":"36SjucKqQpQSvsak9A7h6qzFjrVXpRNZhE","memo":""}}
@@ -833,7 +838,7 @@ module.exports = class kucoin extends Exchange {
         const marketId = this.marketId (symbol);
         const level = this.safeInteger (params, 'level', 2);
         const request = { 'symbol': marketId, 'level': level };
-        let method = 'publicGetMarketOrderbookLevelLevel';
+        let method = 'privateGetMarketOrderbookLevelLevel';
         if (level === 2) {
             if (limit !== undefined) {
                 if ((limit === 20) || (limit === 100)) {
@@ -1461,9 +1466,9 @@ module.exports = class kucoin extends Exchange {
     async withdraw (code, amount, address, tag = undefined, params = {}) {
         await this.loadMarkets ();
         this.checkAddress (address);
-        const currency = this.currencyId (code);
+        const currency = this.currency (code);
         const request = {
-            'currency': currency,
+            'currency': currency['id'],
             'address': address,
             'amount': amount,
         };
@@ -1777,7 +1782,7 @@ module.exports = class kucoin extends Exchange {
             account['free'] = this.safeString (data, 'availableBalance');
             account['total'] = this.safeString (data, 'accountEquity');
             result[code] = account;
-            return this.parseBalance (result, false);
+            return this.parseBalance (result);
         } else {
             const request = {
                 'type': type,
@@ -1812,7 +1817,7 @@ module.exports = class kucoin extends Exchange {
                     result[code] = account;
                 }
             }
-            return this.parseBalance (result, false);
+            return this.parseBalance (result);
         }
     }
 

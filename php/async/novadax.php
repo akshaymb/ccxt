@@ -104,8 +104,8 @@ class novadax extends Exchange {
                 'trading' => array(
                     'tierBased' => false,
                     'percentage' => true,
-                    'taker' => 0.5 / 100,
-                    'maker' => 0.3 / 100,
+                    'taker' => $this->parse_number('0.005'),
+                    'maker' => $this->parse_number('0.003'),
                 ),
             ),
             'requiredCredentials' => array(
@@ -594,7 +594,7 @@ class novadax extends Exchange {
             $account['used'] = $this->safe_string($balance, 'hold');
             $result[$code] = $account;
         }
-        return $this->parse_balance($result, false);
+        return $this->parse_balance($result);
     }
 
     public function create_order($symbol, $type, $side, $amount, $price = null, $params = array ()) {

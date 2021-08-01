@@ -94,15 +94,7 @@ class therock extends Exchange {
                 'funding' => array(
                     'tierBased' => false,
                     'percentage' => false,
-                    'withdraw' => array(
-                        'BTC' => 0.0005,
-                        'BCH' => 0.0005,
-                        'PPC' => 0.02,
-                        'ETH' => 0.001,
-                        'ZEC' => 0.001,
-                        'LTC' => 0.002,
-                        'EUR' => 2.5,  // worst-case scenario => https://therocktrading.com/en/pages/fees
-                    ),
+                    'withdraw' => array(),
                     'deposit' => array(
                         'BTC' => 0,
                         'BCH' => 0,
@@ -228,7 +220,7 @@ class therock extends Exchange {
             $account['total'] = $this->safe_string($balance, 'balance');
             $result[$code] = $account;
         }
-        return $this->parse_balance($result, false);
+        return $this->parse_balance($result);
     }
 
     public function fetch_order_book($symbol, $limit = null, $params = array ()) {

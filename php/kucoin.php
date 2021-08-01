@@ -85,11 +85,8 @@ class kucoin extends Exchange {
                         'markets',
                         'market/allTickers',
                         'market/orderbook/level{level}_{limit}',
-                        'market/orderbook/level{level}',
-                        'market/orderbook/level2',
                         'market/orderbook/level2_20',
                         'market/orderbook/level2_100',
-                        'market/orderbook/level3',
                         'market/histories',
                         'market/candles',
                         'market/stats',
@@ -105,6 +102,9 @@ class kucoin extends Exchange {
                 ),
                 'private' => array(
                     'get' => array(
+                        'market/orderbook/level{level}',
+                        'market/orderbook/level2',
+                        'market/orderbook/level3',
                         'accounts',
                         'accounts/{accountId}',
                         'accounts/{accountId}/ledgers',
@@ -319,15 +319,17 @@ class kucoin extends Exchange {
                     'public' => array(
                         'GET' => array(
                             'status' => 'v1',
-                            'market/orderbook/level2' => 'v2',
-                            'market/orderbook/level3' => 'v2',
                             'market/orderbook/level2_20' => 'v1',
                             'market/orderbook/level2_100' => 'v1',
-                            'market/orderbook/level{level}' => 'v2',
                             'market/orderbook/level{level}_{limit}' => 'v1',
                         ),
                     ),
                     'private' => array(
+                        'GET' => array(
+                            'market/orderbook/level2' => 'v3',
+                            'market/orderbook/level3' => 'v3',
+                            'market/orderbook/level{level}' => 'v3',
+                        ),
                         'POST' => array(
                             'accounts/inner-transfer' => 'v2',
                             'accounts/sub-transfer' => 'v2',
@@ -351,8 +353,10 @@ class kucoin extends Exchange {
                 'accountsByType' => array(
                     'trade' => 'trade',
                     'trading' => 'trade',
+                    'spot' => 'trade',
                     'margin' => 'margin',
                     'main' => 'main',
+                    'funding' => 'main',
                     'futures' => 'contract',
                     'contract' => 'contract',
                     'pool' => 'pool',
@@ -565,9 +569,10 @@ class kucoin extends Exchange {
     }
 
     public function fetch_funding_fee($code, $params = array ()) {
-        $currencyId = $this->currency_id($code);
+        $this->load_markets();
+        $currency = $this->currency($code);
         $request = array(
-            'currency' => $currencyId,
+            'currency' => $currency['id'],
         );
         $response = $this->privateGetWithdrawalsQuotas (array_merge($request, $params));
         $data = $response['data'];
@@ -781,8 +786,8 @@ class kucoin extends Exchange {
 
     public function create_deposit_address($code, $params = array ()) {
         $this->load_markets();
-        $currencyId = $this->currency_id($code);
-        $request = array( 'currency' => $currencyId );
+        $currency = $this->currency($code);
+        $request = array( 'currency' => $currency['id'] );
         $response = $this->privatePostDepositAddresses (array_merge($request, $params));
         // BCH array("$code":"200000","$data":array("$address":"bitcoincash:qza3m4nj9rx7l9r0cdadfqxts6f92shvhvr5ls4q7z","memo":""))
         // BTC array("$code":"200000","$data":array("$address":"36SjucKqQpQSvsak9A7h6qzFjrVXpRNZhE","memo":""))
@@ -807,8 +812,8 @@ class kucoin extends Exchange {
 
     public function fetch_deposit_address($code, $params = array ()) {
         $this->load_markets();
-        $currencyId = $this->currency_id($code);
-        $request = array( 'currency' => $currencyId );
+        $currency = $this->currency($code);
+        $request = array( 'currency' => $currency['id'] );
         $response = $this->privateGetDepositAddresses (array_merge($request, $params));
         // BCH array("$code":"200000","$data":array("$address":"bitcoincash:qza3m4nj9rx7l9r0cdadfqxts6f92shvhvr5ls4q7z","memo":""))
         // BTC array("$code":"200000","$data":array("$address":"36SjucKqQpQSvsak9A7h6qzFjrVXpRNZhE","memo":""))
@@ -836,7 +841,7 @@ class kucoin extends Exchange {
         $marketId = $this->market_id($symbol);
         $level = $this->safe_integer($params, 'level', 2);
         $request = array( 'symbol' => $marketId, 'level' => $level );
-        $method = 'publicGetMarketOrderbookLevelLevel';
+        $method = 'privateGetMarketOrderbookLevelLevel';
         if ($level === 2) {
             if ($limit !== null) {
                 if (($limit === 20) || ($limit === 100)) {
@@ -1464,9 +1469,9 @@ class kucoin extends Exchange {
     public function withdraw($code, $amount, $address, $tag = null, $params = array ()) {
         $this->load_markets();
         $this->check_address($address);
-        $currency = $this->currency_id($code);
+        $currency = $this->currency($code);
         $request = array(
-            'currency' => $currency,
+            'currency' => $currency['id'],
             'address' => $address,
             'amount' => $amount,
         );
@@ -1780,7 +1785,7 @@ class kucoin extends Exchange {
             $account['free'] = $this->safe_string($data, 'availableBalance');
             $account['total'] = $this->safe_string($data, 'accountEquity');
             $result[$code] = $account;
-            return $this->parse_balance($result, false);
+            return $this->parse_balance($result);
         } else {
             $request = array(
                 'type' => $type,
@@ -1815,7 +1820,7 @@ class kucoin extends Exchange {
                     $result[$code] = $account;
                 }
             }
-            return $this->parse_balance($result, false);
+            return $this->parse_balance($result);
         }
     }
 

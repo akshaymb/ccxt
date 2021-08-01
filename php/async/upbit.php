@@ -121,8 +121,8 @@ class upbit extends Exchange {
                 'trading' => array(
                     'tierBased' => false,
                     'percentage' => true,
-                    'maker' => 0.0025,
-                    'taker' => 0.0025,
+                    'maker' => $this->parse_number('0.0025'),
+                    'taker' => $this->parse_number('0.0025'),
                 ),
                 'funding' => array(
                     'tierBased' => false,
@@ -446,7 +446,7 @@ class upbit extends Exchange {
             $account['used'] = $this->safe_string($balance, 'locked');
             $result[$code] = $account;
         }
-        return $this->parse_balance($result, false);
+        return $this->parse_balance($result);
     }
 
     public function fetch_order_books($symbols = null, $limit = null, $params = array ()) {

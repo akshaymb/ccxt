@@ -117,8 +117,8 @@ module.exports = class upbit extends Exchange {
                 'trading': {
                     'tierBased': false,
                     'percentage': true,
-                    'maker': 0.0025,
-                    'taker': 0.0025,
+                    'maker': this.parseNumber ('0.0025'),
+                    'taker': this.parseNumber ('0.0025'),
                 },
                 'funding': {
                     'tierBased': false,
@@ -442,7 +442,7 @@ module.exports = class upbit extends Exchange {
             account['used'] = this.safeString (balance, 'locked');
             result[code] = account;
         }
-        return this.parseBalance (result, false);
+        return this.parseBalance (result);
     }
 
     async fetchOrderBooks (symbols = undefined, limit = undefined, params = {}) {

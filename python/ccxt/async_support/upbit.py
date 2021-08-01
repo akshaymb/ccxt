@@ -126,8 +126,8 @@ class upbit(Exchange):
                 'trading': {
                     'tierBased': False,
                     'percentage': True,
-                    'maker': 0.0025,
-                    'taker': 0.0025,
+                    'maker': self.parse_number('0.0025'),
+                    'taker': self.parse_number('0.0025'),
                 },
                 'funding': {
                     'tierBased': False,
@@ -441,7 +441,7 @@ class upbit(Exchange):
             account['free'] = self.safe_string(balance, 'balance')
             account['used'] = self.safe_string(balance, 'locked')
             result[code] = account
-        return self.parse_balance(result, False)
+        return self.parse_balance(result)
 
     async def fetch_order_books(self, symbols=None, limit=None, params={}):
         await self.load_markets()

@@ -102,8 +102,8 @@ module.exports = class novadax extends Exchange {
                 'trading': {
                     'tierBased': false,
                     'percentage': true,
-                    'taker': 0.5 / 100,
-                    'maker': 0.3 / 100,
+                    'taker': this.parseNumber ('0.005'),
+                    'maker': this.parseNumber ('0.003'),
                 },
             },
             'requiredCredentials': {
@@ -592,7 +592,7 @@ module.exports = class novadax extends Exchange {
             account['used'] = this.safeString (balance, 'hold');
             result[code] = account;
         }
-        return this.parseBalance (result, false);
+        return this.parseBalance (result);
     }
 
     async createOrder (symbol, type, side, amount, price = undefined, params = {}) {

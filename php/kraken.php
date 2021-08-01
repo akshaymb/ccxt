@@ -986,7 +986,7 @@ class kraken extends Exchange {
             $account['total'] = $this->safe_string($balances, $currencyId);
             $result[$code] = $account;
         }
-        return $this->parse_balance($result, false);
+        return $this->parse_balance($result);
     }
 
     public function create_order($symbol, $type, $side, $amount, $price = null, $params = array ()) {
@@ -1294,9 +1294,9 @@ class kraken extends Exchange {
         $this->load_markets();
         $options = $this->safe_value($this->options, 'fetchOrderTrades', array());
         $batchSize = $this->safe_integer($options, 'batchSize', 20);
-        $numBatches = intval($tradeIds / $batchSize);
-        $numBatches = $this->sum($numBatches, 1);
         $numTradeIds = is_array($tradeIds) ? count($tradeIds) : 0;
+        $numBatches = intval($numTradeIds / $batchSize);
+        $numBatches = $this->sum($numBatches, 1);
         $result = array();
         for ($j = 0; $j < $numBatches; $j++) {
             $requestIds = array();

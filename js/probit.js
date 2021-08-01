@@ -107,8 +107,8 @@ module.exports = class probit extends Exchange {
                 'trading': {
                     'tierBased': false,
                     'percentage': true,
-                    'maker': 0.2 / 100,
-                    'taker': 0.2 / 100,
+                    'maker': this.parseNumber ('0.002'),
+                    'taker': this.parseNumber ('0.002'),
                 },
             },
             'exceptions': {
@@ -127,6 +127,7 @@ module.exports = class probit extends Exchange {
                     'INVALID_CURRENCY': BadRequest, // Requested currency is not exist on ProBit system
                     'TOO_MANY_OPEN_ORDERS': DDoSProtection, // Too many open orders
                     'DUPLICATE_ADDRESS': InvalidAddress, // Address already exists in withdrawal address list
+                    'invalid_grant': AuthenticationError, // {"error":"invalid_grant"}
                 },
             },
             'requiredCredentials': {
@@ -143,12 +144,17 @@ module.exports = class probit extends Exchange {
             },
             'commonCurrencies': {
                 'AUTO': 'Cube',
+                'BCC': 'BCC',
+                'BDP': 'BidiPass',
                 'BTCBEAR': 'BEAR',
                 'BTCBULL': 'BULL',
                 'CBC': 'CryptoBharatCoin',
                 'EPS': 'Epanus',  // conflict with EPS Ellipsis https://github.com/ccxt/ccxt/issues/8909
                 'HBC': 'Hybrid Bank Cash',
+                'ORC': 'Oracle System',
+                'SOC': 'Soda Coin',
                 'UNI': 'UNICORN Token',
+                'UNISWAP': 'UNI',
             },
             'secret': '0ac56e854bf0b580d8a2ebd46eb8af24',
             'apiKey': 'f8babbb054f4263c'
@@ -381,7 +387,7 @@ module.exports = class probit extends Exchange {
             account['free'] = this.safeString (balance, 'available');
             result[code] = account;
         }
-        return this.parseBalance (result, false);
+        return this.parseBalance (result);
     }
 
     async fetchOrderBook (symbol, limit = undefined, params = {}) {
@@ -702,7 +708,7 @@ module.exports = class probit extends Exchange {
             timestamp = parseInt (timestamp / 1000);
             const firstSunday = 259200; // 1970-01-04T00:00:00.000Z
             const difference = timestamp - firstSunday;
-            const numWeeks = this.integerDivide (difference, duration);
+            const numWeeks = Math.floor (difference / duration);
             let previousSunday = this.sum (firstSunday, numWeeks * duration);
             if (after) {
                 previousSunday = this.sum (previousSunday, duration);
@@ -1102,7 +1108,7 @@ module.exports = class probit extends Exchange {
             // 'platform_id': 'ETH', // if omitted it will use the default platform for the currency
             'address': address,
             'destination_tag': tag,
-            'amount': this.currencyToPrecision (code, amount),
+            'amount': this.numberToString (amount),
             // which currency to pay the withdrawal fees
             // only applicable for currencies that accepts multiple withdrawal fee options
             // 'fee_currency_id': 'ETH', // if omitted it will use the default fee policy for each currency

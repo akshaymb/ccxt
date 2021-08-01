@@ -93,9 +93,11 @@ class yobit extends Exchange {
                 'BCS' => 'BitcoinStake',
                 'BITS' => 'Bitstar',
                 'BLN' => 'Bulleon',
+                'BNS' => 'Benefit Bonus Coin',
                 'BOT' => 'BOTcoin',
                 'BON' => 'BONES',
                 'BPC' => 'BitcoinPremium',
+                'BST' => 'BitStone',
                 'BTS' => 'Bitshares2',
                 'CAT' => 'BitClave',
                 'CBC' => 'CryptoBossCoin',
@@ -125,6 +127,7 @@ class yobit extends Exchange {
                 'GENE' => 'Genesiscoin',
                 'GOLD' => 'GoldMint',
                 'GOT' => 'Giotto Coin',
+                'GSX' => 'GlowShares',
                 'HTML5' => 'HTML',
                 'HYPERX' => 'HYPER',
                 'ICN' => 'iCoin',
@@ -255,7 +258,7 @@ class yobit extends Exchange {
             $account['total'] = $this->safe_string($total, $currencyId);
             $result[$code] = $account;
         }
-        return $this->parse_balance($result, false);
+        return $this->parse_balance($result);
     }
 
     public function fetch_markets($params = array ()) {

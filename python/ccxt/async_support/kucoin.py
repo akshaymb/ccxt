@@ -98,11 +98,8 @@ class kucoin(Exchange):
                         'markets',
                         'market/allTickers',
                         'market/orderbook/level{level}_{limit}',
-                        'market/orderbook/level{level}',
-                        'market/orderbook/level2',
                         'market/orderbook/level2_20',
                         'market/orderbook/level2_100',
-                        'market/orderbook/level3',
                         'market/histories',
                         'market/candles',
                         'market/stats',
@@ -118,6 +115,9 @@ class kucoin(Exchange):
                 },
                 'private': {
                     'get': [
+                        'market/orderbook/level{level}',
+                        'market/orderbook/level2',
+                        'market/orderbook/level3',
                         'accounts',
                         'accounts/{accountId}',
                         'accounts/{accountId}/ledgers',
@@ -332,15 +332,17 @@ class kucoin(Exchange):
                     'public': {
                         'GET': {
                             'status': 'v1',
-                            'market/orderbook/level2': 'v2',
-                            'market/orderbook/level3': 'v2',
                             'market/orderbook/level2_20': 'v1',
                             'market/orderbook/level2_100': 'v1',
-                            'market/orderbook/level{level}': 'v2',
                             'market/orderbook/level{level}_{limit}': 'v1',
                         },
                     },
                     'private': {
+                        'GET': {
+                            'market/orderbook/level2': 'v3',
+                            'market/orderbook/level3': 'v3',
+                            'market/orderbook/level{level}': 'v3',
+                        },
                         'POST': {
                             'accounts/inner-transfer': 'v2',
                             'accounts/sub-transfer': 'v2',
@@ -364,8 +366,10 @@ class kucoin(Exchange):
                 'accountsByType': {
                     'trade': 'trade',
                     'trading': 'trade',
+                    'spot': 'trade',
                     'margin': 'margin',
                     'main': 'main',
+                    'funding': 'main',
                     'futures': 'contract',
                     'contract': 'contract',
                     'pool': 'pool',
@@ -566,9 +570,10 @@ class kucoin(Exchange):
         return result
 
     async def fetch_funding_fee(self, code, params={}):
-        currencyId = self.currency_id(code)
+        await self.load_markets()
+        currency = self.currency(code)
         request = {
-            'currency': currencyId,
+            'currency': currency['id'],
         }
         response = await self.privateGetWithdrawalsQuotas(self.extend(request, params))
         data = response['data']
@@ -771,8 +776,8 @@ class kucoin(Exchange):
 
     async def create_deposit_address(self, code, params={}):
         await self.load_markets()
-        currencyId = self.currency_id(code)
-        request = {'currency': currencyId}
+        currency = self.currency(code)
+        request = {'currency': currency['id']}
         response = await self.privatePostDepositAddresses(self.extend(request, params))
         # BCH {"code":"200000","data":{"address":"bitcoincash:qza3m4nj9rx7l9r0cdadfqxts6f92shvhvr5ls4q7z","memo":""}}
         # BTC {"code":"200000","data":{"address":"36SjucKqQpQSvsak9A7h6qzFjrVXpRNZhE","memo":""}}
@@ -794,8 +799,8 @@ class kucoin(Exchange):
 
     async def fetch_deposit_address(self, code, params={}):
         await self.load_markets()
-        currencyId = self.currency_id(code)
-        request = {'currency': currencyId}
+        currency = self.currency(code)
+        request = {'currency': currency['id']}
         response = await self.privateGetDepositAddresses(self.extend(request, params))
         # BCH {"code":"200000","data":{"address":"bitcoincash:qza3m4nj9rx7l9r0cdadfqxts6f92shvhvr5ls4q7z","memo":""}}
         # BTC {"code":"200000","data":{"address":"36SjucKqQpQSvsak9A7h6qzFjrVXpRNZhE","memo":""}}
@@ -820,7 +825,7 @@ class kucoin(Exchange):
         marketId = self.market_id(symbol)
         level = self.safe_integer(params, 'level', 2)
         request = {'symbol': marketId, 'level': level}
-        method = 'publicGetMarketOrderbookLevelLevel'
+        method = 'privateGetMarketOrderbookLevelLevel'
         if level == 2:
             if limit is not None:
                 if (limit == 20) or (limit == 100):
@@ -1406,9 +1411,9 @@ class kucoin(Exchange):
     async def withdraw(self, code, amount, address, tag=None, params={}):
         await self.load_markets()
         self.check_address(address)
-        currency = self.currency_id(code)
+        currency = self.currency(code)
         request = {
-            'currency': currency,
+            'currency': currency['id'],
             'address': address,
             'amount': amount,
         }
@@ -1698,7 +1703,7 @@ class kucoin(Exchange):
             account['free'] = self.safe_string(data, 'availableBalance')
             account['total'] = self.safe_string(data, 'accountEquity')
             result[code] = account
-            return self.parse_balance(result, False)
+            return self.parse_balance(result)
         else:
             request = {
                 'type': type,
@@ -1731,7 +1736,7 @@ class kucoin(Exchange):
                     account['free'] = self.safe_string(balance, 'available')
                     account['used'] = self.safe_string(balance, 'holds')
                     result[code] = account
-            return self.parse_balance(result, False)
+            return self.parse_balance(result)
 
     async def transfer(self, code, amount, fromAccount, toAccount, params={}):
         await self.load_markets()

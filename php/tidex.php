@@ -93,8 +93,8 @@ class tidex extends Exchange {
                     'feeSide' => 'get',
                     'tierBased' => false,
                     'percentage' => true,
-                    'taker' => 0.1 / 100,
-                    'maker' => 0.1 / 100,
+                    'taker' => $this->parse_number('0.001'),
+                    'maker' => $this->parse_number('0.001'),
                 ),
             ),
             'commonCurrencies' => array(
@@ -328,7 +328,7 @@ class tidex extends Exchange {
             $account['used'] = $this->safe_string($balance, 'inOrders');
             $result[$code] = $account;
         }
-        return $this->parse_balance($result, false);
+        return $this->parse_balance($result);
     }
 
     public function fetch_order_book($symbol, $limit = null, $params = array ()) {

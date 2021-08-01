@@ -141,8 +141,8 @@ module.exports = class bittrex extends Exchange {
                 'trading': {
                     'tierBased': true,
                     'percentage': true,
-                    'maker': 0.0035,
-                    'taker': 0.0035,
+                    'maker': this.parseNumber ('0.0075'),
+                    'taker': this.parseNumber ('0.0075'),
                 },
                 'funding': {
                     'tierBased': false,
@@ -315,7 +315,7 @@ module.exports = class bittrex extends Exchange {
             account['total'] = this.safeString (balance, 'total');
             result[code] = account;
         }
-        return this.parseBalance (result, false);
+        return this.parseBalance (result);
     }
 
     async fetchOrderBook (symbol, limit = undefined, params = {}) {

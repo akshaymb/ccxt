@@ -191,6 +191,7 @@ class hitbtc extends Exchange {
             'commonCurrencies' => array(
                 'AUTO' => 'Cube',
                 'BCC' => 'BCC', // initial symbol for Bitcoin Cash, now inactive
+                'BDP' => 'BidiPass',
                 'BET' => 'DAO.Casino',
                 'BOX' => 'BOX Token',
                 'CPT' => 'Cryptaur', // conflict with CPT = Contents Protocol https://github.com/ccxt/ccxt/issues/4920 and https://github.com/ccxt/ccxt/issues/6081
@@ -464,7 +465,7 @@ class hitbtc extends Exchange {
             $account['used'] = $this->safe_string($balance, 'reserved');
             $result[$code] = $account;
         }
-        return $this->parse_balance($result, false);
+        return $this->parse_balance($result);
     }
 
     public function parse_ohlcv($ohlcv, $market = null) {

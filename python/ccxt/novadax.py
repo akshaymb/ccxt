@@ -114,8 +114,8 @@ class novadax(Exchange):
                 'trading': {
                     'tierBased': False,
                     'percentage': True,
-                    'taker': 0.5 / 100,
-                    'maker': 0.3 / 100,
+                    'taker': self.parse_number('0.005'),
+                    'maker': self.parse_number('0.003'),
                 },
             },
             'requiredCredentials': {
@@ -583,7 +583,7 @@ class novadax(Exchange):
             account['free'] = self.safe_string(balance, 'balance')
             account['used'] = self.safe_string(balance, 'hold')
             result[code] = account
-        return self.parse_balance(result, False)
+        return self.parse_balance(result)
 
     def create_order(self, symbol, type, side, amount, price=None, params={}):
         self.load_markets()

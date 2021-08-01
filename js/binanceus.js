@@ -40,6 +40,8 @@ module.exports = class binanceus extends binance {
             'options': {
                 'quoteOrderQty': false,
             },
+            'apiKey':'4HbDmWyK2UMx9dfq5AKPMpOmT8S912uMr14mPKFo0VD4hQkoLKabzxDza7TsuhQV',
+            'secret' : 'ROdcWFvxRLkHx2b5AQhg5hMoOLAFakpDdqm6bJKjwRHyfsb2Jx9zj8gDWQZtM0BG'
         });
     }
 

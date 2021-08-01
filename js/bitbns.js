@@ -114,6 +114,8 @@ module.exports = class bitbns extends Exchange {
                 },
                 'broad': {},
             },
+            'apiKey':'25CDCA483E2F00F30772EE32DF82CBB5',
+            'secret' : 'F9BA699C9D13B0226ADE6D7642EDB8E9'
         });
     }
 
@@ -195,8 +197,8 @@ module.exports = class bitbns extends Exchange {
                 'quote': quote,
                 'baseId': baseId,
                 'quoteId': quoteId,
-                'info': market,
-                'active': undefined,
+                'info': market, 
+                'active': true,
                 'precision': precision,
                 'limits': {
                     'amount': {
@@ -212,6 +214,8 @@ module.exports = class bitbns extends Exchange {
                         'max': this.safeNumber (costLimits, 'max'),
                     },
                 },
+                'taker': 0.0025,
+                'maker': 0.0025
             });
         }
         return result;

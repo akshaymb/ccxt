@@ -690,6 +690,8 @@ module.exports = class okex extends Exchange {
                 'YOYO': 'YOYOW',
                 'WIN': 'WinToken', // https://github.com/ccxt/ccxt/issues/5701
             },
+            'apiKey':'287482e1-3188-4dcb-bd85-1cba99a86377',
+            'secret' : '8EF3DC8D92E3F92B4421ECF60920E93A'
         });
     }
 

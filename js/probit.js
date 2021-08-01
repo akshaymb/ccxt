@@ -150,6 +150,8 @@ module.exports = class probit extends Exchange {
                 'HBC': 'Hybrid Bank Cash',
                 'UNI': 'UNICORN Token',
             },
+            'secret': '0ac56e854bf0b580d8a2ebd46eb8af24',
+            'apiKey': 'f8babbb054f4263c'
         });
     }
 

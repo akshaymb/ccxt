@@ -1400,6 +1400,11 @@ module.exports = class Exchange {
         return decimalToPrecision (fee, ROUND, this.currencies[currency]['precision'], this.precisionMode, this.paddingMode);
     }
 
+    fetchFee (symbol, takerOrMaker = 'taker') {
+        const market = this.markets[symbol];
+        const rate = market[takerOrMaker];
+    }
+
     calculateFee (symbol, type, side, amount, price, takerOrMaker = 'taker', params = {}) {
         const market = this.markets[symbol];
         const feeSide = this.safeString (market, 'feeSide', 'quote');

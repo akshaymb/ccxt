@@ -217,6 +217,8 @@ module.exports = class bittrex extends Exchange {
             'commonCurrencies': {
                 'REPV2': 'REP',
             },
+            'apiKey':'a18c41f4847f4080863bf17c7c7acec1',
+            'secret' : '4a9806f803234b228829e1278fa00e74'            
         });
     }
 
